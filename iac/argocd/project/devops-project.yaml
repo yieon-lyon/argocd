@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: devops
+  namespace: devops
+  # Finalizer that ensures that project is not deleted until it is not referenced by any application
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  # Project description
+  description: DevOps Project
+
+  # Allow manifests to deploy from any Git repos
+  sourceRepos:
+    - git@github.com:ORGANIZATION/argocd.git
+
+  # Only permit applications to deploy to the guestbook namespace in the same cluster
+  destinations:
+    - namespace: '*'
+      name: cluster-prod
+    - namespace: '*'
+      name: cluster-staging
+    - namespace: '*'
+      name: cluster-dev
+
+  # Deny all cluster-scoped resources from being created, except for Namespace
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  clusterResourceBlacklist:
+    - group: '*'
+      kind: 'Namespace'
+
+  # Deny all namespaced-scoped resources from being created, except for Deployment and StatefulSet
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  # Enables namespace orphaned resource monitoring.
+  orphanedResources:
+    warn: false

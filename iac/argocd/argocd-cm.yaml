@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  repositories: |
+    - url: git@github.com:ORGANIZATION/argocd.git
+      sshPrivateKeySecret:
+        name: argocd-ssh
+        key: privateKey
+  configManagementPlugins: |-
+    - name: argocd-vault-plugin
+      generate:
+        command: ["argocd-vault-plugin"]
+        args: ["generate", "./"]
+  accounts.devops: apiKey, login
+  accounts.ae: apiKey, login
+  accounts.be: apiKey, login

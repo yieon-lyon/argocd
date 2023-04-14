@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sample-prod
+  namespace: default
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: sample-prod=AWSACCOUNT.dkr.ecr.ap-northeast-2.amazonaws.com/sample
+    argocd-image-updater.argoproj.io/sample-prod.update-strategy: latest
+    argocd-image-updater.argoproj.io/sample-prod.pull-secret: ext:/app/config/ecr.sh
+    argocd-image-updater.argoproj.io/sample-prod.allow-tags: regexp:^(\d+\.)?(\d+\.)?(\*|\d+)-prod$
+    argocd-image-updater.argoproj.io/write-back-method: git:secret:default/argocd-image-updater-git-ssh
+spec:
+  project: devops
+  destination:
+    name: cluster-prod
+    namespace: sample
+  source:
+    path: application/sample/overlays/prod
+    repoURL: git@github.com:ORGINIZATION/argocd.git
+    targetRevision: main
+  syncPolicy:
+    syncOptions:     # Sync options which modifies sync behavior
+    - Validate=false # disables resource validation (equivalent to 'kubectl apply --validate=false') ( true by default ).
+    - CreateNamespace=true # Namespace Auto-Creation ensures that namespace specified as the application destination exists in the destination cluster.
+    - PrunePropagationPolicy=foreground # Supported policies are background, foreground and orphan.
+    - PruneLast=true # Allow the ability for resource pruning to happen as a final, implicit wave of a sync operation
+    - ApplyOutOfSyncOnly=true
+    - RespectIgnoreDifferences=true
+    - Replace=true
+    # The retry feature is available since v1.7
+    retry:
+      limit: 5 # number of failed sync attempt retries; unlimited number of attempts if less than 0
+      backoff:
+        duration: 5s # the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
+        factor: 2 # a factor to multiply the base duration after each failed retry
+        maxDuration: 3m # the maximum amount of time allowed for the backoff strategy

@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: argocd-rbac-cm
+    app.kubernetes.io/part-of: argocd
+  name: argocd-rbac-cm
+data:
+  policy.default: role:readonly
+  policy.csv: |
+    # role:readonly
+    p, role:readonly, applications, get, */*, allow
+    p, role:readonly, certificates, get, *, allow
+    p, role:readonly, clusters, get, *, allow
+    p, role:readonly, repositories, get, *, allow
+    p, role:readonly, projects, get, *, allow
+    p, role:readonly, accounts, get, *, allow
+    p, role:readonly, gpgkeys, get, *, allow
+    p, role:readonly, logs, get, */*, allow
+
+    # role: cluster
+    p, role:cluster, clusters, create, *, allow
+    p, role:cluster, clusters, update, *, allow
+
+    # role:create_repositories
+    p, role:create_repositories, repositories, create, *, allow
+
+    # role:delete_repositories
+    p, role:delete_repositories, repositories, delete, *, allow
+
+    # devops application
+    p, role:devops_application, applications, sync, devops/*, allow
+    g, devops, role:readonly
+    g, devops, role:devops_application
+    g, devops, role:cluster
+
+    # image image-updater
+    p, role:image-updater, applications, get, */*, allow
+    p, role:image-updater, applications, update, */*, allow
+    g, image-updater, role:image-updater

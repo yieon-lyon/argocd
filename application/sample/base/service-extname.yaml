@@ -1,0 +1,12 @@
+# production external service
+apiVersion: v1
+kind: Service
+metadata:
+  name: extname-sample
+  namespace: sample
+spec:
+  type: ExternalName
+  externalName: sample.sample.svc.cluster.local
+  ports:
+    - protocol: TCP
+      port: 80

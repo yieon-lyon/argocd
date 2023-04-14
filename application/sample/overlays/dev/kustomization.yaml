@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1
+kind: Kustomization
+
+resources:
+- ../../base
+
+namespace: sample
+images:
+- name: AWSACCOUNT.dkr.ecr.ap-northeast-2.amazonaws.com/sample
+  newTag: dev

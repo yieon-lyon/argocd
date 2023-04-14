@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-deployment
+  labels:
+    app: sample
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sample
+  template:
+    metadata:
+      labels:
+        app: sample
+    spec:
+      containers:
+        - name: sample
+          image: AWSACCOUNT.dkr.ecr.ap-northeast-2.amazonaws.com/sample:IMAGE_TAG
+          ports:
+            - name: liveness-port
+              containerPort: 8080
+          resources:
+            limits:
+              cpu: 800m
+            requests:
+              cpu: 800m
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: liveness-port
+            failureThreshold: 18
+            periodSeconds: 10
+      tolerations:
+        - effect: NoSchedule
+          key: subnettype
+          operator: Equal
+          value: private
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: subnettype
+                    operator: In
+                    values:
+                      - private
